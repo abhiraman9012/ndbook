@@ -12,7 +12,7 @@ jobs:
   run-notebook:
     runs-on: ubuntu-latest
     # Add a timeout to prevent the job from running indefinitely
-    timeout-minutes: 30
+    timeout-minutes: 60
     
     steps:
     - name: Checkout repository
@@ -26,17 +26,25 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install jupyter
+        pip install jupyter nbconvert nbformat
+        # Install core dependencies needed for notebook execution
+        pip install google-generativeai IPython
+        pip install pillow numpy
+        pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
+        pip install requests
+        # Skip the more problematic dependencies (kokoro, soundfile, etc.) as they'll be skipped in CI mode
         
-    - name: Run CI-friendly script
+    - name: Run notebook with CI adaptations
       run: |
-        # Run the CI script instead of the full notebook
-        python notebook_ci.py > notebook_execution.log 2>&1
+        # Run our script that modifies and executes the notebook in CI-friendly way
+        python run_notebook.py
         
-    - name: Upload execution log as artifact
+    - name: Upload executed notebook and logs as artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: execution-log
+        name: notebook-execution-results
         path: |
-          notebook_execution.log
-          notebook_report.json
+          notebook_ci_ready.ipynb
+          executed_notebook.ipynb
+          notebook_execution_report.json
+          *.log
