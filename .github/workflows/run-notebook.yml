@@ -26,25 +26,25 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install jupyter nbconvert nbformat
-        # Install core dependencies needed for notebook execution
-        pip install google-generativeai IPython
-        pip install pillow numpy
+        # Install exact packages from the notebook
+        pip install jupyter nbconvert
+        pip install google-generativeai
+        pip install IPython
+        pip install pillow
         pip install google-auth google-auth-oauthlib google-auth-httplib2 google-api-python-client
-        pip install requests
-        # Skip the more problematic dependencies (kokoro, soundfile, etc.) as they'll be skipped in CI mode
+        pip install kokoro>=0.9.2 soundfile
+        pip install numpy requests
+        # Install system dependencies
+        sudo apt-get update
+        sudo apt-get install -y espeak-ng
         
-    - name: Run notebook with CI adaptations
+    - name: Run notebook directly
       run: |
-        # Run our script that modifies and executes the notebook in CI-friendly way
-        python run_notebook.py
+        # Run the notebook directly using nbconvert
+        jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=1800 --ExecutePreprocessor.allow_errors=True notebook.ipynb --output executed_notebook.ipynb
         
-    - name: Upload executed notebook and logs as artifacts
+    - name: Upload executed notebook as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: notebook-execution-results
-        path: |
-          notebook_ci_ready.ipynb
-          executed_notebook.ipynb
-          notebook_execution_report.json
-          *.log
+        name: executed-notebook
+        path: executed_notebook.ipynb
