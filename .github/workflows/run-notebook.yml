@@ -34,9 +34,6 @@ jobs:
         sudo apt-get install -y espeak-ng
         
     - name: Convert and run notebook
-      env:
-        # You'll need to add this as a secret in your GitHub repository
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: |
         # Run the notebook using nbconvert
         jupyter nbconvert --to notebook --execute notebook.ipynb --output executed_notebook.ipynb
