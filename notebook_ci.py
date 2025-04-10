@@ -35,6 +35,6 @@ print(json.dumps(report, indent=2))
 
 # Save report to file
 with open("notebook_report.json", "w") as f:
-    json.dumps(report, indent=2, fp=f)
+    json.dump(report, f, indent=2)
 
 print("\n✅ CI check completed successfully")
